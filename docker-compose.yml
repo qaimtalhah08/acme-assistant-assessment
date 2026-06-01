@@ -1,0 +1,72 @@
+version: "3.9"
+
+services:
+
+  # ── FastAPI App ──────────────────────────────────────────
+  app:
+    build: ./app
+    ports:
+      - "8000:8000"
+    env_file: .env
+    depends_on:
+      - postgres
+      - redis
+      - keycloak
+    volumes:
+      - ./app:/app
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+
+  # ── MCP Server ───────────────────────────────────────────
+  mcp:
+    build: ./mcp
+    ports:
+      - "8001:8001"
+    env_file: .env
+    depends_on:
+      - postgres
+
+  # ── PostgreSQL ───────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER:     acme_user
+      POSTGRES_PASSWORD: acme_pass
+      POSTGRES_DB:       acme_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./seed.sql:/docker-entrypoint-initdb.d/seed.sql
+
+  # ── Redis ────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  # ── Jaeger — Distributed Tracing UI ─────────────────────
+  # Receives traces from the FastAPI app via OTLP protocol
+  # and displays them in a visual timeline dashboard.
+  # Access the Jaeger UI at http://localhost:16686
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    ports:
+      - "16686:16686"   # Jaeger web UI
+      - "4317:4317"     # OTLP gRPC receiver
+    environment:
+      COLLECTOR_OTLP_ENABLED: "true"
+
+  # ── Keycloak ─────────────────────────────────────────────
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0
+    command: start-dev --import-realm
+    environment:
+      KEYCLOAK_ADMIN:          admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./keycloak/realm.json:/opt/keycloak/data/import/realm.json
+
+volumes:
+  postgres_data:

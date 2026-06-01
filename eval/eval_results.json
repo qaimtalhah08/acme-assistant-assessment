@@ -1,0 +1,200 @@
+{
+  "eval_date": "2026-06-01T01:57:25.217193",
+  "api_url": "http://localhost:8000/api/v1",
+  "total_tests": 10,
+  "passed": 10,
+  "failed": 0,
+  "pass_rate": "100%",
+  "avg_latency_ms": 2884.9,
+  "total_time_ms": 28848.97,
+  "test_commentary": {
+    "tool_selection": "Agent dynamically selects tools based on query intent",
+    "rbac": "Role restrictions enforced at agent level before tool execution",
+    "grounding": "All responses verified against seeded PostgreSQL data",
+    "error_handling": "Unknown customers return clear not-found messages",
+    "multi_step": "Test 8 validates two-tool sequential reasoning"
+  },
+  "results": [
+    {
+      "id": 1,
+      "description": "Sales user looks up Acme Corp profile by company name",
+      "user": "salesuser",
+      "query": "Show me the profile for Acme Corp",
+      "passed": true,
+      "checks": {
+        "correct_tools": true,
+        "keywords_found": true,
+        "response_exists": true
+      },
+      "response": "Customer profile for Acme Corp (James Miller):\n- Name: James Miller\n- Email: james@acmecorp.com\n- Phone: +44 20 1234 5678\n- Company: Acme Corp\n- Country: UK",
+      "tools_used": [
+        "get_customer_profile"
+      ],
+      "latency_ms": 2631.87,
+      "error": null
+    },
+    {
+      "id": 2,
+      "description": "Agent retrieves open issues for TechStart Ltd",
+      "user": "salesuser",
+      "query": "What are the open issues for TechStart Ltd?",
+      "passed": true,
+      "checks": {
+        "correct_tools": true,
+        "keywords_found": true,
+        "response_exists": true
+      },
+      "response": "TechStart Ltd has two open issues:\n1. API timeout errors (Critical priority) - Integration API timing out after 5 seconds under load.\n2. Data export failing (High priority) - CSV export button does nothing, reported by 3 users.",
+      "tools_used": [
+        "get_open_issues"
+      ],
+      "latency_ms": 2136.13,
+      "error": null
+    },
+    {
+      "id": 3,
+      "description": "Agent summarises the full history of issue 1",
+      "user": "supportuser",
+      "query": "Retrieve and summarise the complete history of issue 1 including all updates [eval-ref:1780275413-t3]",
+      "passed": true,
+      "checks": {
+        "correct_tools": true,
+        "keywords_found": true,
+        "response_exists": true
+      },
+      "response": "Issue 1, titled \"Login portal not working,\" is currently open with critical priority. Users have been unable to log into the customer portal since Monday due to the authentication service being down. The issue was identified, and a fix has been deployed to the staging environment, where testing is currently underway. There have been a total of 3 updates on this issue.",
+      "tools_used": [
+        "summarise_issue"
+      ],
+      "latency_ms": 3996.75,
+      "error": null
+    },
+    {
+      "id": 4,
+      "description": "Escalation Summary Skill produces risk assessment for Acme Corp",
+      "user": "supportuser",
+      "query": "Give me an escalation summary for Acme Corp",
+      "passed": true,
+      "checks": {
+        "correct_tools": true,
+        "keywords_found": true,
+        "response_exists": true
+      },
+      "response": "Acme Corp has a critical risk level due to multiple issues: a non-functional login portal affecting user access, invoice amount mismatches causing finance concerns, and slow dashboard loading. Engineering is investigating and deploying fixes, but urgent resolution is needed to prevent revenue loss.\n\nRecommended next action: Prioritize and expedite resolution of the login portal issue to restore user access immediately.\n\nMissing information includes expected resolution timelines, impact details of invoice mismatches, confirmation on Stripe API key rotation effects, and status of the staging fix testing.",
+      "tools_used": [
+        "escalation_summary"
+      ],
+      "latency_ms": 4946.39,
+      "error": null
+    },
+    {
+      "id": 5,
+      "description": "Admin user successfully creates a next action for issue 4",
+      "user": "adminuser",
+      "query": "Create a next action for issue 4: Scale the API server horizontally to handle increased load [eval-ref:1780275413-t5]",
+      "passed": true,
+      "checks": {
+        "correct_tools": true,
+        "keywords_found": true,
+        "response_exists": true
+      },
+      "response": "Next action \"Scale the API server horizontally to handle increased load\" has been successfully created for issue 4.",
+      "tools_used": [
+        "create_next_action"
+      ],
+      "latency_ms": 2092.31,
+      "error": null
+    },
+    {
+      "id": 6,
+      "description": "Sales user correctly blocked from creating next actions (RBAC)",
+      "user": "salesuser",
+      "query": "Create a next action for issue 2: Contact the customer immediately to discuss the invoice [eval-ref:1780275413-t6]",
+      "passed": true,
+      "checks": {
+        "correct_tools": true,
+        "keywords_found": true,
+        "response_exists": true
+      },
+      "response": "As a sales user, you are not able to create next actions. Only support and admin roles can do this.",
+      "tools_used": [
+        "create_next_action"
+      ],
+      "latency_ms": 2589.07,
+      "error": null
+    },
+    {
+      "id": 7,
+      "description": "Agent identifies critical payment issue for FinBridge",
+      "user": "supportuser",
+      "query": "Are there any critical issues for FinBridge?",
+      "passed": true,
+      "checks": {
+        "correct_tools": true,
+        "keywords_found": true,
+        "response_exists": true
+      },
+      "response": "FinBridge has one critical issue: \"Payment gateway integration broken\" with Stripe payments failing and causing revenue impact.",
+      "tools_used": [
+        "get_open_issues"
+      ],
+      "latency_ms": 2132.35,
+      "error": null
+    },
+    {
+      "id": 8,
+      "description": "Agent handles compound query requiring two sequential tool calls",
+      "user": "supportuser",
+      "query": "Show open issues for GlobalRetail and summarise the most urgent one",
+      "passed": true,
+      "checks": {
+        "correct_tools": true,
+        "keywords_found": true,
+        "response_exists": true
+      },
+      "response": "GlobalRetail has one open issue: \"Password reset email not sending\" with high priority. Users have not been receiving password reset emails since the last deployment. The cause was expired SMTP credentials, and new credentials have been requested to fix this.",
+      "tools_used": [
+        "get_open_issues",
+        "summarise_issue"
+      ],
+      "latency_ms": 4917.33,
+      "error": null
+    },
+    {
+      "id": 9,
+      "description": "Sales user successfully retrieves the complete customer list",
+      "user": "salesuser",
+      "query": "Show me all customers",
+      "passed": true,
+      "checks": {
+        "correct_tools": true,
+        "keywords_found": true,
+        "response_exists": true
+      },
+      "response": "The customers in the system are:\n1. James Miller (Acme Corp)\n2. Sarah Ahmed (TechStart Ltd)\n3. Robert Singh (GlobalRetail)\n4. Emily Watson (FinBridge)\n5. Omar Abdullah (CloudNova)",
+      "tools_used": [
+        "list_all_customers"
+      ],
+      "latency_ms": 1816.93,
+      "error": null
+    },
+    {
+      "id": 10,
+      "description": "Agent handles unknown customer gracefully with clear error",
+      "user": "salesuser",
+      "query": "Show me issues for XYZ Unknown Company",
+      "passed": true,
+      "checks": {
+        "correct_tools": true,
+        "keywords_found": true,
+        "response_exists": true
+      },
+      "response": "Customer \"XYZ Unknown Company\" not found. Unable to retrieve issues.",
+      "tools_used": [
+        "get_open_issues"
+      ],
+      "latency_ms": 1589.84,
+      "error": null
+    }
+  ]
+}

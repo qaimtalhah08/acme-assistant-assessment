@@ -1,0 +1,62 @@
+# ============================================================
+# requirements.txt — Python Dependencies for Acme Assistant
+# ============================================================
+# Install all dependencies:
+#   pip install -r requirements.txt
+# ============================================================
+
+# Web framework — FastAPI for building the REST API
+fastapi==0.111.0
+
+# ASGI server — serves FastAPI with async support and hot reload
+uvicorn[standard]==0.29.0
+
+# JWT verification — verifies Keycloak RS256 signed tokens
+python-jose[cryptography]==3.3.0
+
+# HTTP client — used to fetch Keycloak JWKS public keys
+requests==2.31.0
+
+# Environment variables — loads .env file at runtime
+python-dotenv==1.0.0
+
+# ORM — SQLAlchemy async engine for PostgreSQL queries
+sqlalchemy==2.0.30
+
+# PostgreSQL async driver — required by SQLAlchemy async engine
+asyncpg==0.29.0
+
+# Azure OpenAI — GPT-4.1-mini client for agent and skills
+# Pinned to 1.55.3 — newer versions have httpx incompatibility
+openai==1.55.3
+
+# HTTP library — pinned to 0.27.2 for openai compatibility
+# Newer httpx versions removed 'proxies' argument used by openai
+httpx==0.27.2
+
+# Redis client — async session memory and query cache
+redis==5.0.4
+
+# Data validation — request/response schema validation
+pydantic==2.7.0
+
+# Async file serving — required for StaticFiles in FastAPI
+aiofiles==23.2.1
+
+# ── OpenTelemetry — Distributed Tracing ──────────────────────
+# Core OpenTelemetry SDK for creating traces and spans
+opentelemetry-sdk==1.24.0
+
+# FastAPI auto-instrumentation — traces all HTTP requests
+opentelemetry-instrumentation-fastapi==0.45b0
+
+# SQLAlchemy auto-instrumentation — traces all DB queries
+opentelemetry-instrumentation-sqlalchemy==0.45b0
+
+# OTLP exporter — sends traces to Jaeger via gRPC
+opentelemetry-exporter-otlp-proto-grpc==1.24.0
+
+# Semantic conventions — pinned for compatibility
+opentelemetry-semantic-conventions==0.45b0
+# pkg_resources dependency for opentelemetry instrumentation
+setuptools==69.0.0

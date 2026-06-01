@@ -1,0 +1,89 @@
+{
+    "realm": "acme",
+    "enabled": true,
+    "sslRequired": "none",
+    "registrationAllowed": false,
+    "clients": [
+        {
+            "clientId": "acme-app",
+            "enabled": true,
+            "publicClient": true,
+            "directAccessGrantsEnabled": true,
+            "redirectUris": [
+                "http://localhost:8000/*"
+            ],
+            "webOrigins": [
+                "*"
+            ]
+        }
+    ],
+    "roles": {
+        "realm": [
+            {
+                "name": "sales_user",
+                "description": "Read only access"
+            },
+            {
+                "name": "support_user",
+                "description": "Read and update access"
+            },
+            {
+                "name": "admin",
+                "description": "Full access"
+            }
+        ]
+    },
+    "users": [
+        {
+            "username": "salesuser",
+            "enabled": true,
+            "email": "sales@acme.com",
+            "firstName": "Sales",
+            "lastName": "User",
+            "credentials": [
+                {
+                    "type": "password",
+                    "value": "sales123",
+                    "temporary": false
+                }
+            ],
+            "realmRoles": [
+                "sales_user"
+            ]
+        },
+        {
+            "username": "supportuser",
+            "enabled": true,
+            "email": "support@acme.com",
+            "firstName": "Support",
+            "lastName": "User",
+            "credentials": [
+                {
+                    "type": "password",
+                    "value": "support123",
+                    "temporary": false
+                }
+            ],
+            "realmRoles": [
+                "support_user"
+            ]
+        },
+        {
+            "username": "adminuser",
+            "enabled": true,
+            "email": "admin@acme.com",
+            "firstName": "Admin",
+            "lastName": "User",
+            "credentials": [
+                {
+                    "type": "password",
+                    "value": "admin123",
+                    "temporary": false
+                }
+            ],
+            "realmRoles": [
+                "admin"
+            ]
+        }
+    ]
+}

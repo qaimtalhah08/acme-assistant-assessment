@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acme Assistant</title>
+    <style>
+        /* ── Reset ───────────────────────────────────────────
+           Remove default browser margin/padding on all elements */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* ── Body ────────────────────────────────────────────
+           Full viewport height, column layout for navbar + content */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f0f2f5;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ── Navigation Bar ──────────────────────────────────
+           Dark top bar with app title and assessment label */
+        .navbar {
+            background: #1a1a2e;
+            color: white;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 10;
+        }
+
+        .navbar h1 {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .navbar span {
+            font-size: 13px;
+            color: #aaa;
+        }
+
+        /* ── Login Card ──────────────────────────────────────
+           Centered white card shown before authentication */
+        #login-section {
+            max-width: 420px;
+            margin: 80px auto;
+            background: white;
+            border-radius: 12px;
+            padding: 32px;
+            box-shadow: 0 2px 16px rgba(0, 0, 0, 0.08);
+        }
+
+        #login-section h2 {
+            font-size: 22px;
+            margin-bottom: 8px;
+            color: #1a1a2e;
+        }
+
+        #login-section p {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 24px;
+        }
+
+        /* ── Form Fields ─────────────────────────────────────*/
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: #444;
+            margin-bottom: 6px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+            transition: border 0.2s;
+        }
+
+        /* Highlight focused input with brand colour */
+        .form-group input:focus {
+            border-color: #4f46e5;
+        }
+
+        /* ── Primary Button ──────────────────────────────────*/
+        .btn {
+            width: 100%;
+            padding: 12px;
+            background: #4f46e5;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn:hover {
+            background: #4338ca;
+        }
+
+        .btn:disabled {
+            background: #aaa;
+            cursor: not-allowed;
+        }
+
+        /* ── Login Error Message ─────────────────────────────
+           Red banner shown below login button on failure */
+        .error-msg {
+            background: #fee2e2;
+            color: #dc2626;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            margin-top: 12px;
+        }
+
+        /* ── Main App Layout ─────────────────────────────────
+           Hidden until login — row layout: sidebar + content */
+        #app-section {
+            display: none;
+            flex: 1;
+            flex-direction: row;
+        }
+
+        /* ── Sidebar ─────────────────────────────────────────
+           Fixed-width left panel with example query buttons */
+        .sidebar {
+            width: 260px;
+            min-width: 260px;
+            background: white;
+            border-right: 1px solid #eee;
+            display: flex;
+            flex-direction: column;
+            padding: 20px 16px;
+            gap: 8px;
+        }
+
+        /* Section label above query groups */
+        .sidebar-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        /* Clickable query shortcut buttons in sidebar */
+        .sidebar-query {
+            padding: 10px 12px;
+            background: #f5f5f5;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #444;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s;
+            line-height: 1.4;
+        }
+
+        /* Highlight on hover with brand colour */
+        .sidebar-query:hover {
+            background: #ede9fe;
+            color: #4f46e5;
+        }
+
+        /* Thin horizontal rule between query groups */
+        .sidebar-divider {
+            height: 1px;
+            background: #eee;
+            margin: 8px 0;
+        }
+
+        /* ── New Conversation Button ──────────────────────────
+           Pinned to bottom of sidebar — clears chat history */
+        .refresh-btn {
+            margin-top: auto;
+            padding: 10px 12px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #444;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .refresh-btn:hover {
+            background: #f5f5f5;
+            border-color: #4f46e5;
+            color: #4f46e5;
+        }
+
+        /* Rotate icon on hover for visual feedback */
+        .refresh-icon {
+            font-size: 16px;
+            transition: transform 0.4s;
+        }
+
+        .refresh-btn:hover .refresh-icon {
+            transform: rotate(180deg);
+        }
+
+        /* ── Main Content Area ───────────────────────────────
+           Flex column: user bar on top, chat window below */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            gap: 16px;
+            overflow: hidden;
+        }
+
+        /* ── User Info Bar ───────────────────────────────────
+           Shows avatar, username, role badge, and sign out */
+        .user-bar {
+            background: white;
+            border-radius: 10px;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Circular avatar showing first letter of username */
+        .avatar {
+            width: 36px;
+            height: 36px;
+            background: #4f46e5;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        /* ── Role Badges ─────────────────────────────────────
+           Colour-coded pill showing the user's RBAC role */
+        .role-badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        /* Admin = amber, Support = blue, Sales = green */
+        .role-admin {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .role-support {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .role-sales {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        /* Sign out button — turns red on hover */
+        .logout-btn {
+            padding: 6px 14px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: white;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .logout-btn:hover {
+            background: #fee2e2;
+            border-color: #f87171;
+            color: #dc2626;
+        }
+
+        /* ── Chat Window ─────────────────────────────────────
+           White rounded card containing messages and input */
+        .chat-container {
+            flex: 1;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Scrollable message list — grows to fill available space */
+        #messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        /* Centered welcome text shown before first query */
+        .welcome-msg {
+            text-align: center;
+            color: #999;
+            font-size: 14px;
+            margin: auto;
+        }
+
+        .welcome-msg h3 {
+            font-size: 18px;
+            color: #444;
+            margin-bottom: 8px;
+        }
+
+        /* ── Message Bubbles ─────────────────────────────────
+           User messages right-aligned, assistant left-aligned */
+        .message {
+            display: flex;
+            flex-direction: column;
+            max-width: 80%;
+        }
+
+        .message.user {
+            align-self: flex-end;
+            align-items: flex-end;
+        }
+
+        .message.assistant {
+            align-self: flex-start;
+            align-items: flex-start;
+        }
+
+        .bubble {
+            padding: 12px 16px;
+            border-radius: 16px;
+            font-size: 14px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+
+        /* User bubble: brand purple with white text */
+        .message.user .bubble {
+            background: #4f46e5;
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        /* Assistant bubble: light grey with dark text */
+        .message.assistant .bubble {
+            background: #f5f5f5;
+            color: #333;
+            border-bottom-left-radius: 4px;
+        }
+
+        /* ── Tool Tags ───────────────────────────────────────
+           Small purple pills below assistant bubbles showing
+           which agent tools were called for the response */
+        .tools-used {
+            font-size: 11px;
+            color: #999;
+            margin-top: 4px;
+            padding: 0 4px;
+        }
+
+        .tool-tag {
+            display: inline-block;
+            background: #ede9fe;
+            color: #5b21b6;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+            margin: 2px;
+        }
+
+        /* ── Loading Animation ───────────────────────────────
+           Three bouncing dots shown while agent is processing */
+        .loading {
+            display: flex;
+            gap: 4px;
+            padding: 12px 16px;
+            background: #f5f5f5;
+            border-radius: 16px;
+            border-bottom-left-radius: 4px;
+            width: fit-content;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            background: #aaa;
+            border-radius: 50%;
+            animation: bounce 1.2s infinite;
+        }
+
+        /* Stagger each dot's animation for wave effect */
+        .dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            60%,
+            100% {
+                transform: translateY(0);
+            }
+
+            30% {
+                transform: translateY(-6px);
+            }
+        }
+
+        /* ── Text Input Area ─────────────────────────────────
+           Pill-shaped input with round send button */
+        .input-area {
+            padding: 16px 20px;
+            border-top: 1px solid #eee;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        #query-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid #ddd;
+            border-radius: 24px;
+            font-size: 14px;
+            outline: none;
+            transition: border 0.2s;
+        }
+
+        #query-input:focus {
+            border-color: #4f46e5;
+        }
+
+        /* Round send button with arrow icon */
+        #send-btn {
+            width: 44px;
+            height: 44px;
+            background: #4f46e5;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+            flex-shrink: 0;
+        }
+
+        #send-btn:hover {
+            background: #4338ca;
+        }
+
+        #send-btn:disabled {
+            background: #aaa;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Top navigation bar -->
+    <nav class="navbar">
+        <h1>Acme Assistant</h1>
+        <span>EY Assessment — Applied AI Engineer</span>
+    </nav>
+
+    <!-- Login form — visible before authentication -->
+    <div id="login-section">
+        <h2>Sign In</h2>
+        <p>Enter your Keycloak credentials to continue</p>
+
+        <div class="form-group">
+            <label>Username</label>
+            <input type="text" id="username" placeholder="Enter username" />
+        </div>
+
+        <div class="form-group">
+            <label>Password</label>
+            <!-- Enter key triggers login for convenience -->
+            <input type="password" id="password" placeholder="Enter password"
+                onkeypress="if(event.key==='Enter') login()" />
+        </div>
+
+        <button class="btn" onclick="login()">Sign In</button>
+
+        <!-- Error banner — hidden by default, shown on login failure -->
+        <div id="login-error" style="display:none" class="error-msg"></div>
+    </div>
+
+    <!-- Main app — hidden until login succeeds -->
+    <div id="app-section">
+
+        <!-- Left sidebar with example query shortcuts -->
+        <div class="sidebar">
+            <div class="sidebar-title">Example Queries</div>
+
+            <!-- Primary queries covering core agent capabilities -->
+            <button class="sidebar-query" onclick="useQuery(this)">
+                Show me open issues for Acme Corp
+            </button>
+            <button class="sidebar-query" onclick="useQuery(this)">
+                Summarise issue 1
+            </button>
+            <button class="sidebar-query" onclick="useQuery(this)">
+                What is the escalation status for TechStart?
+            </button>
+            <button class="sidebar-query" onclick="useQuery(this)">
+                Show me all customers
+            </button>
+
+            <div class="sidebar-divider"></div>
+            <div class="sidebar-title">More Queries</div>
+
+            <!-- Additional queries for demo and assessment -->
+            <button class="sidebar-query" onclick="useQuery(this)">
+                Show me open issues for FinBridge
+            </button>
+            <button class="sidebar-query" onclick="useQuery(this)">
+                Give me an escalation summary for Acme Corp
+            </button>
+            <button class="sidebar-query" onclick="useQuery(this)">
+                Are there critical issues for TechStart?
+            </button>
+            <button class="sidebar-query" onclick="useQuery(this)">
+                Show me the profile for GlobalRetail
+            </button>
+            <!-- Log access — only visible to admin in agent response -->
+            <button class="sidebar-query" onclick="useQuery(this)">
+                Show me the request logs
+            </button>
+
+            <!-- Resets session ID and clears chat history -->
+            <button class="refresh-btn" onclick="refreshChat()">
+                <span class="refresh-icon">↻</span>
+                New Conversation
+            </button>
+        </div>
+
+        <!-- Main content: user bar + chat window -->
+        <div class="main-content">
+
+            <!-- Authenticated user info bar -->
+            <div class="user-bar">
+                <div class="user-info">
+                    <!-- Avatar shows first letter of username -->
+                    <div class="avatar" id="avatar">U</div>
+                    <div>
+                        <div style="font-weight:600;font-size:14px" id="display-name">User</div>
+                        <div style="font-size:12px;color:#888" id="display-email"></div>
+                    </div>
+                    <!-- Role badge colour set dynamically in showApp() -->
+                    <span class="role-badge" id="role-badge">role</span>
+                </div>
+                <button class="logout-btn" onclick="logout()">Sign Out</button>
+            </div>
+
+            <!-- Chat interface -->
+            <div class="chat-container">
+
+                <!-- Scrollable message history -->
+                <div id="messages">
+                    <!-- Welcome message replaced on first query -->
+                    <div class="welcome-msg" id="welcome">
+                        <h3>Hello! How can I help?</h3>
+                        <p>Select a query from the left or type your own below.</p>
+                    </div>
+                </div>
+
+                <!-- Fixed input bar at bottom of chat -->
+                <div class="input-area">
+                    <input type="text" id="query-input" placeholder="Ask about customers, issues..."
+                        onkeypress="handleKey(event)" />
+                    <button id="send-btn" onclick="sendQuery()">
+                        <!-- Send arrow SVG icon -->
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                            <line x1="22" y1="2" x2="11" y2="13" />
+                            <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ── State ─────────────────────────────────────────────
+        // All auth state is held in memory — cleared on logout
+        let authToken = null;  // JWT Bearer token from Keycloak
+        let sessionId = null;  // UUID for Redis session memory
+        let currentUser = null;  // Decoded user info from JWT
+
+        // ── API Configuration ─────────────────────────────────
+        const KEYCLOAK_URL = 'http://localhost:8080';
+        const API_URL = 'http://localhost:8000/api/v1';
+        const REALM = 'acme';
+        const CLIENT_ID = 'acme-app';
+
+
+        // ── Login ─────────────────────────────────────────────
+        // Authenticates with Keycloak using ROPC grant flow,
+        // stores the JWT token, and switches to the app view.
+        async function login() {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+
+            if (!username || !password) {
+                showLoginError('Please enter username and password');
+                return;
+            }
+
+            // Disable button and show loading state
+            const btn = document.querySelector('.btn');
+            btn.disabled = true;
+            btn.textContent = 'Signing in...';
+
+            try {
+                // Request JWT token from Keycloak token endpoint
+                const response = await fetch(
+                    `${KEYCLOAK_URL}/realms/${REALM}/protocol/openid-connect/token`,
+                    {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: new URLSearchParams({
+                            client_id: CLIENT_ID,
+                            username: username,
+                            password: password,
+                            grant_type: 'password'
+                        })
+                    }
+                );
+
+                if (!response.ok) {
+                    showLoginError('Invalid username or password');
+                    return;
+                }
+
+                const data = await response.json();
+
+                // Store token and decode user info from JWT payload
+                authToken = data.access_token;
+                const decoded = parseJWT(authToken);
+
+                currentUser = {
+                    username: decoded.preferred_username,
+                    email: decoded.email || '',
+                    roles: decoded.realm_access?.roles || []
+                };
+
+                // Generate new session ID for Redis conversation memory
+                sessionId = crypto.randomUUID();
+
+                showApp();
+
+            } catch (err) {
+                showLoginError('Login failed. Is Keycloak running?');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Sign In';
+            }
+        }
+
+
+        // ── JWT Decoder ───────────────────────────────────────
+        // Decodes the JWT payload without verifying the signature.
+        // Signature verification is handled server-side in auth.py.
+        function parseJWT(token) {
+            const base64 = token.split('.')[1]
+                .replace(/-/g, '+')
+                .replace(/_/g, '/');
+            return JSON.parse(atob(base64));
+        }
+
+
+        // ── Login Error Display ───────────────────────────────
+        function showLoginError(message) {
+            const el = document.getElementById('login-error');
+            el.textContent = message;
+            el.style.display = 'block';
+        }
+
+
+        // ── Show Main App ─────────────────────────────────────
+        // Hides login form, shows app layout, and populates
+        // the user bar with username, email, and role badge.
+        function showApp() {
+            document.getElementById('login-section').style.display = 'none';
+            document.getElementById('app-section').style.display = 'flex';
+
+            // Populate user info bar
+            document.getElementById('avatar').textContent =
+                currentUser.username[0].toUpperCase();
+            document.getElementById('display-name').textContent =
+                currentUser.username;
+            document.getElementById('display-email').textContent =
+                currentUser.email;
+
+            // Set role badge colour based on highest role
+            const roles = currentUser.roles;
+            let roleName = 'User';
+            let roleClass = 'role-sales';
+
+            if (roles.includes('admin')) {
+                roleName = 'Admin';
+                roleClass = 'role-admin';
+            } else if (roles.includes('support_user')) {
+                roleName = 'Support';
+                roleClass = 'role-support';
+            } else if (roles.includes('sales_user')) {
+                roleName = 'Sales';
+                roleClass = 'role-sales';
+            }
+
+            const badge = document.getElementById('role-badge');
+            badge.textContent = roleName;
+            badge.className = `role-badge ${roleClass}`;
+
+            document.getElementById('query-input').focus();
+        }
+
+
+        // ── Logout ────────────────────────────────────────────
+        // Clears all auth state and returns to the login screen.
+        function logout() {
+            authToken = null;
+            sessionId = null;
+            currentUser = null;
+
+            document.getElementById('login-section').style.display = 'block';
+            document.getElementById('app-section').style.display = 'none';
+            document.getElementById('password').value = '';
+            document.getElementById('login-error').style.display = 'none';
+
+            resetMessages();
+        }
+
+
+        // ── Sidebar Query Click ───────────────────────────────
+        // Fills the input with the button text and sends it.
+        function useQuery(el) {
+            document.getElementById('query-input').value =
+                el.textContent.trim();
+            sendQuery();
+        }
+
+
+        // ── New Conversation ──────────────────────────────────
+        // Generates a new session ID (clearing Redis memory)
+        // and resets the chat to the welcome screen.
+        function refreshChat() {
+            sessionId = crypto.randomUUID();
+            resetMessages();
+            document.getElementById('query-input').focus();
+        }
+
+
+        // ── Reset Messages ────────────────────────────────────
+        // Replaces message history with the welcome screen.
+        function resetMessages() {
+            document.getElementById('messages').innerHTML = `
+                <div class="welcome-msg" id="welcome">
+                    <h3>Hello! How can I help?</h3>
+                    <p>Select a query from the left or type your own below.</p>
+                </div>`;
+        }
+
+
+        // ── Enter Key Handler ─────────────────────────────────
+        function handleKey(event) {
+            if (event.key === 'Enter') sendQuery();
+        }
+
+
+        // ── Send Query ────────────────────────────────────────
+        // Posts the query to the agent API with the JWT token
+        // and session ID, then displays the response.
+        async function sendQuery() {
+            const input = document.getElementById('query-input');
+            const query = input.value.trim();
+
+            if (!query || !authToken) return;
+
+            input.value = '';
+            document.getElementById('send-btn').disabled = true;
+
+            // Remove welcome message on first real query
+            const welcome = document.getElementById('welcome');
+            if (welcome) welcome.remove();
+
+            addMessage('user', query);
+            const loadingId = showLoading();
+
+            try {
+                // POST to agent endpoint with Bearer token
+                const response = await fetch(`${API_URL}/query`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({
+                        query: query,
+                        session_id: sessionId
+                    })
+                });
+
+                removeLoading(loadingId);
+
+                if (!response.ok) {
+                    const err = await response.json();
+                    addMessage('assistant',
+                        `Error: ${err.detail || 'Something went wrong'}`);
+                    return;
+                }
+
+                const data = await response.json();
+
+                // Display response with tool tags below the bubble
+                addMessage('assistant', data.response, data.tools_used);
+
+            } catch (err) {
+                removeLoading(loadingId);
+                addMessage('assistant', 'Connection error. Is the server running?');
+            }
+
+            document.getElementById('send-btn').disabled = false;
+            input.focus();
+        }
+
+
+        // ── Add Message Bubble ────────────────────────────────
+        // Creates a message div with a bubble and optional
+        // tool tags, then scrolls to the bottom.
+        function addMessage(role, text, toolsUsed = []) {
+            const messages = document.getElementById('messages');
+            const div = document.createElement('div');
+            div.className = `message ${role}`;
+
+            const bubble = document.createElement('div');
+            bubble.className = 'bubble';
+            bubble.textContent = text;
+            div.appendChild(bubble);
+
+            // Show tool tags only for assistant messages
+            if (role === 'assistant' && toolsUsed.length > 0) {
+                const toolsDiv = document.createElement('div');
+                toolsDiv.className = 'tools-used';
+                toolsDiv.innerHTML = 'Tools: ' + toolsUsed
+                    .map(t => `<span class="tool-tag">${t}</span>`)
+                    .join('');
+                div.appendChild(toolsDiv);
+            }
+
+            messages.appendChild(div);
+            messages.scrollTop = messages.scrollHeight;
+        }
+
+
+        // ── Loading Animation ─────────────────────────────────
+        // Shows three bouncing dots while waiting for response.
+        function showLoading() {
+            const messages = document.getElementById('messages');
+            const id = 'loading-' + Date.now();
+            const div = document.createElement('div');
+            div.className = 'message assistant';
+            div.id = id;
+            div.innerHTML = `
+                <div class="loading">
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                </div>`;
+            messages.appendChild(div);
+            messages.scrollTop = messages.scrollHeight;
+            return id;
+        }
+
+
+        // ── Remove Loading ────────────────────────────────────
+        function removeLoading(id) {
+            const el = document.getElementById(id);
+            if (el) el.remove();
+        }
+    </script>
+
+</body>
+
+</html>
