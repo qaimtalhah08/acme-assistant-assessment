@@ -282,6 +282,16 @@ The keyword-based evaluation approach (OR logic) is
 intentionally flexible to accommodate minor paraphrasing
 while still validating factual grounding.
 
+## MCP Integration Note
+
+All 10 tests pass with tools executing exclusively through
+the MCP server HTTP interface. The agent uses call_mcp_tool()
+for every tool call — no direct database access in agent.py.
+
+This confirms proper separation of concerns between:
+- agent.py — reasoning and RBAC only
+- mcp_server.py — all tool logic and DB access
+
 ### Latency Characteristics
 Average latency of 2,244ms reflects:
 - Azure OpenAI API call: ~1,500ms

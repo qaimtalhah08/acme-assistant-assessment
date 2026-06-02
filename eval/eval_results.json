@@ -1,12 +1,12 @@
 {
-  "eval_date": "2026-06-01T01:57:25.217193",
+  "eval_date": "2026-06-02T13:15:52.516997",
   "api_url": "http://localhost:8000/api/v1",
   "total_tests": 10,
   "passed": 10,
   "failed": 0,
   "pass_rate": "100%",
-  "avg_latency_ms": 2884.9,
-  "total_time_ms": 28848.97,
+  "avg_latency_ms": 3669.33,
+  "total_time_ms": 36693.34,
   "test_commentary": {
     "tool_selection": "Agent dynamically selects tools based on query intent",
     "rbac": "Role restrictions enforced at agent level before tool execution",
@@ -30,7 +30,7 @@
       "tools_used": [
         "get_customer_profile"
       ],
-      "latency_ms": 2631.87,
+      "latency_ms": 2974.63,
       "error": null
     },
     {
@@ -48,25 +48,25 @@
       "tools_used": [
         "get_open_issues"
       ],
-      "latency_ms": 2136.13,
+      "latency_ms": 2418.59,
       "error": null
     },
     {
       "id": 3,
       "description": "Agent summarises the full history of issue 1",
       "user": "supportuser",
-      "query": "Retrieve and summarise the complete history of issue 1 including all updates [eval-ref:1780275413-t3]",
+      "query": "Retrieve and summarise the complete history of issue 1 including all updates [eval-ref:1780402512-t3]",
       "passed": true,
       "checks": {
         "correct_tools": true,
         "keywords_found": true,
         "response_exists": true
       },
-      "response": "Issue 1, titled \"Login portal not working,\" is currently open with critical priority. Users have been unable to log into the customer portal since Monday due to the authentication service being down. The issue was identified, and a fix has been deployed to the staging environment, where testing is currently underway. There have been a total of 3 updates on this issue.",
+      "response": "Issue 1, titled \"Login portal not working,\" is currently open with critical priority. Users have been unable to log into the customer portal since Monday due to the authentication service being down. A fix has been deployed to the staging environment and is currently being tested. There have been 3 updates in total on this issue.",
       "tools_used": [
         "summarise_issue"
       ],
-      "latency_ms": 3996.75,
+      "latency_ms": 5371.18,
       "error": null
     },
     {
@@ -80,47 +80,47 @@
         "keywords_found": true,
         "response_exists": true
       },
-      "response": "Acme Corp has a critical risk level due to multiple issues: a non-functional login portal affecting user access, invoice amount mismatches causing finance concerns, and slow dashboard loading. Engineering is investigating and deploying fixes, but urgent resolution is needed to prevent revenue loss.\n\nRecommended next action: Prioritize and expedite resolution of the login portal issue to restore user access immediately.\n\nMissing information includes expected resolution timelines, impact details of invoice mismatches, confirmation on Stripe API key rotation effects, and status of the staging fix testing.",
+      "response": "Acme Corp has a critical risk level due to multiple issues including a non-functional login portal and invoice amount mismatches. The recommended next action is to immediately prioritize and resolve the login portal issue to restore user access and prevent further revenue impact. Missing information includes expected resolution timelines, root cause details for invoice issues, Stripe API key rotation impact, and customer impact on slow dashboard loading.",
       "tools_used": [
         "escalation_summary"
       ],
-      "latency_ms": 4946.39,
+      "latency_ms": 6341.25,
       "error": null
     },
     {
       "id": 5,
       "description": "Admin user successfully creates a next action for issue 4",
       "user": "adminuser",
-      "query": "Create a next action for issue 4: Scale the API server horizontally to handle increased load [eval-ref:1780275413-t5]",
+      "query": "Create a next action for issue 4: Scale the API server horizontally to handle increased load [eval-ref:1780402512-t5]",
       "passed": true,
       "checks": {
         "correct_tools": true,
         "keywords_found": true,
         "response_exists": true
       },
-      "response": "Next action \"Scale the API server horizontally to handle increased load\" has been successfully created for issue 4.",
+      "response": "Next action created for issue 4: Scale the API server horizontally to handle increased load.",
       "tools_used": [
         "create_next_action"
       ],
-      "latency_ms": 2092.31,
+      "latency_ms": 2717.87,
       "error": null
     },
     {
       "id": 6,
       "description": "Sales user correctly blocked from creating next actions (RBAC)",
       "user": "salesuser",
-      "query": "Create a next action for issue 2: Contact the customer immediately to discuss the invoice [eval-ref:1780275413-t6]",
+      "query": "Create a next action for issue 2: Contact the customer immediately to discuss the invoice [eval-ref:1780402512-t6]",
       "passed": true,
       "checks": {
         "correct_tools": true,
         "keywords_found": true,
         "response_exists": true
       },
-      "response": "As a sales user, you are not able to create next actions. Only support and admin roles can do this.",
+      "response": "As a sales user, you are not able to create next actions.\nOnly support and admin roles can do this.",
       "tools_used": [
         "create_next_action"
       ],
-      "latency_ms": 2589.07,
+      "latency_ms": 3437.95,
       "error": null
     },
     {
@@ -134,11 +134,11 @@
         "keywords_found": true,
         "response_exists": true
       },
-      "response": "FinBridge has one critical issue: \"Payment gateway integration broken\" with Stripe payments failing and causing revenue impact.",
+      "response": "FinBridge has one critical issue currently open: \"Payment gateway integration broken\" with Stripe payments failing and causing revenue impact.",
       "tools_used": [
         "get_open_issues"
       ],
-      "latency_ms": 2132.35,
+      "latency_ms": 2446.28,
       "error": null
     },
     {
@@ -152,12 +152,12 @@
         "keywords_found": true,
         "response_exists": true
       },
-      "response": "GlobalRetail has one open issue: \"Password reset email not sending\" with high priority. Users have not been receiving password reset emails since the last deployment. The cause was expired SMTP credentials, and new credentials have been requested to fix this.",
+      "response": "GlobalRetail has one open issue: \"Password reset email not sending\" with high priority. Users have not been receiving password reset emails since the last deployment. The problem was identified as expired SMTP credentials, and new credentials have been requested to fix it.",
       "tools_used": [
         "get_open_issues",
         "summarise_issue"
       ],
-      "latency_ms": 4917.33,
+      "latency_ms": 6180.55,
       "error": null
     },
     {
@@ -171,11 +171,11 @@
         "keywords_found": true,
         "response_exists": true
       },
-      "response": "The customers in the system are:\n1. James Miller (Acme Corp)\n2. Sarah Ahmed (TechStart Ltd)\n3. Robert Singh (GlobalRetail)\n4. Emily Watson (FinBridge)\n5. Omar Abdullah (CloudNova)",
+      "response": "Here are the customers in the system:\n\n1. James Miller (Acme Corp) - james@acmecorp.com - UK\n2. Sarah Ahmed (TechStart Ltd) - sarah@techstart.com - UK\n3. Robert Singh (GlobalRetail) - robert@globalretail.com - UK\n4. Emily Watson (FinBridge) - emily@finbridge.com - UK\n5. Omar Abdullah (CloudNova) - omar@cloudnova.com - UK\n\nLet me know if you need details on any specific customer.",
       "tools_used": [
         "list_all_customers"
       ],
-      "latency_ms": 1816.93,
+      "latency_ms": 3108.71,
       "error": null
     },
     {
@@ -189,11 +189,11 @@
         "keywords_found": true,
         "response_exists": true
       },
-      "response": "Customer \"XYZ Unknown Company\" not found. Unable to retrieve issues.",
+      "response": "Customer \"XYZ Unknown Company\" not found. Please check the name and try again.",
       "tools_used": [
         "get_open_issues"
       ],
-      "latency_ms": 1589.84,
+      "latency_ms": 1696.33,
       "error": null
     }
   ]

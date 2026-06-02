@@ -112,41 +112,43 @@ See `docs/architecture.png` for the full system diagram.
 
 acme-assistant/
 ├── docker-compose.yml        # All six services
-├── .env                      # Secrets and config (not committed)
+├── .env                      # Secrets — not committed
 ├── .env.example              # Environment template
 ├── seed.sql                  # PostgreSQL sample data
 ├── README.md                 # This file
 ├── AI-USAGE.md               # AI tool usage notes
 │
 ├── app/
-│   ├── main.py               # FastAPI entry point, middleware
-│   ├── auth.py               # Keycloak JWT verification + RBAC
-│   ├── agent.py              # LLM agent loop + tool execution
+│   ├── main.py               # FastAPI entry point
+│   ├── auth.py               # Keycloak JWT + RBAC
+│   ├── agent.py              # LLM agent
 │   ├── skills.py             # Reusable AI skills
-│   ├── database.py           # SQLAlchemy models + session
-│   ├── routes.py             # API route handlers
-│   ├── observability.py      # OpenTelemetry tracing setup
+│   ├── database.py           # SQLAlchemy models
+│   ├── routes.py             # API endpoints
+│   ├── observability.py      # OpenTelemetry tracing
 │   ├── Dockerfile
 │   ├── requirements.txt
 │   └── static/
 │       └── index.html        # Chat UI
 │
 ├── mcp/
-│   ├── mcp_server.py         # MCP tool server
+│   ├── mcp_server.py      # MCP server — all tool logic lives here
+│   │                      # HTTP interface + stdio MCP protocol
+│   │                      # Agent calls tools via HTTP
 │   ├── Dockerfile
 │   └── requirements.txt
 │
 ├── eval/
-│   ├── eval.py               # 10-test evaluation suite
-│   ├── eval_results.json     # Latest evaluation output
-│   └── EVAL-COMMENTARY.md    # Results with commentary
+│   ├── eval.py               # 10-test eval suite
+│   ├── eval_results.json     # Results
+│   └── EVAL-COMMENTARY.md    # Commentary
 │
 ├── docs/
-│   ├── architecture.html     # Interactive diagram source
-│   └── architecture.png      # Architecture diagram image
+│   ├── architecture.html     # Diagram source
+│   └── architecture.png      # Diagram image
 │
 └── keycloak/
-└── realm.json            # Realm, roles, and seed users
+    └── realm.json            # Realm + roles + users
 
 ---
 
@@ -384,8 +386,66 @@ OpenTelemetry traces in Jaeger provide per-span latency breakdown, making it str
 
 ## Trade-offs and Decisions
 
+
 ### MCP Integration
-The MCP server exposes Acme tools via the Model Context Protocol as a standalone container. The main agent in `agent.py` also implements the same tools directly using SQLAlchemy, providing a reliable fallback and demonstrating both approaches. In production, the agent would connect exclusively via the MCP protocol.
+The agent calls all tools exclusively through the MCP server
+HTTP interface via `call_mcp_tool()`. There is no direct
+database access in `agent.py` — all tool logic lives in
+`mcp_server.py`.
+
+The MCP server exposes both an HTTP interface (used by the
+agent) and the standard stdio MCP protocol (for MCP-compatible
+clients).
+
+In production, the MCP server would be deployed and versioned
+independently of the agent, allowing tool improvements without
+agent redeployment.
+### 2. MCP Server (`mcp/mcp_server.py`)
+
+Implements a standalone Model Context Protocol server exposing
+Acme-specific tools. This satisfies Section 4.2 of the assessment.
+
+**Why MCP is useful here:**
+
+**(a) Separation of concerns** — Tool definitions and database
+logic live entirely in `mcp_server.py`. The agent in `agent.py`
+calls tools exclusively through the MCP server HTTP interface
+via `call_mcp_tool()` — no direct database access from the agent.
+
+**(b) Reusability** — Any MCP-compatible agent or framework
+can connect to this server and use the same tools, regardless
+of which LLM or orchestration layer is used.
+
+**(c) Industry standard** — MCP is an emerging standard for
+AI tool integration adopted by major AI providers.
+
+**How the agent connects to MCP:**
+
+User Query
+↓
+Agent (agent.py) — reasons about which tool to call
+↓ HTTP POST /tools/{tool_name}
+MCP Server (:8001) — executes the tool
+↓ SQL query
+PostgreSQL (:5432) — returns dat
+
+The MCP server exposes two interfaces:
+1. **HTTP REST API on port 8001** — used by the agent
+2. **stdio MCP protocol** — standard MCP transport for
+   MCP-compatible clients
+
+**Tools exposed (7 total):**
+
+| Tool | Description |
+|------|-------------|
+| `get_customer_profile` | Fetch customer by name or company |
+| `get_open_issues` | Open issues for a customer |
+| `summarise_issue` | Issue with full update history |
+| `create_next_action` | Persist a new next action |
+| `get_next_actions` | List actions for an issue |
+| `list_all_customers` | All customers in system |
+| `get_recent_updates` | Recent updates across all issues |
+
 
 ### CORS Policy
 `allow_origins=["*"]` is used for local development and demo simplicity. In production this would be restricted to specific trusted domains via an environment variable, preventing unauthorised cross-origin API access.
