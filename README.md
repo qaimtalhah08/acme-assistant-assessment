@@ -487,4 +487,5 @@ This project was developed with Claude (Anthropic) as the primary AI coding assi
 | MCP Server | 8001 | localhost:8001 |
 | Jaeger Tracing UI | 16686 | http://localhost:16686 |
 
-Keycloak admin credentials: `admin` / `admin`
+Keycloak admin credentials: `admin` / `admin` 
+ 

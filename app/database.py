@@ -329,3 +329,5 @@ async def get_db():
         finally:
             # Always close the session to return it to the pool
             await session.close()
+ 
+ 

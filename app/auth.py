@@ -328,3 +328,5 @@ def require_admin(payload: dict = Depends(verify_token)):
             detail="Access denied. Admin role required."
         )
     return payload
+ 
+ 
