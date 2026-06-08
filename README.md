@@ -1,5 +1,5 @@
 # Acme Assistant
-### EY Applied AI Engineer Assessment — Agentic Enterprise Solution
+### Agentic Enterprise Solution
 
 An agentic AI assistant for Acme Operations that enables sales, support, and admin staff to query customer issues, generate AI-powered escalation summaries, and manage recommended actions — through a secure, role-aware chat interface.
 
@@ -486,5 +486,3 @@ This project was developed with Claude (Anthropic) as the primary AI coding assi
 | Redis | 6379 | localhost:6379 |
 | MCP Server | 8001 | localhost:8001 |
 | Jaeger Tracing UI | 16686 | http://localhost:16686 |
-
-Keycloak admin credentials: `admin` / `admin`
