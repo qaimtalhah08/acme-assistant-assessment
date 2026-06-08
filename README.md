@@ -310,13 +310,15 @@ Access traces at: **http://localhost:16686**
 
 Example trace for "Show me all customers":
 
+```
 HTTP POST /api/v1/query          2.17s
-├── agent.run                  2.15s
-│   ├── redis.cache_check      9ms   (miss)
-│   ├── azure_openai.call      692ms (iteration 1 — tool selection)
-│   ├── tool.list_all_customers 21ms  (PostgreSQL query)
-│   └── azure_openai.call      1.42s (iteration 2 — final answer)
-└── HTTP Response 200
+  ├── agent.run                  2.15s
+  │   ├── redis.cache_check       9ms  (miss)
+  │   ├── azure_openai.call      692ms (iteration 1 — tool selection)
+  │   ├── tool.list_all_customers 21ms  (DB query via MCP)
+  │   └── azure_openai.call     1.42s  (iteration 2 — final answer)
+  └── HTTP Response 200
+```
 
 ---
 
