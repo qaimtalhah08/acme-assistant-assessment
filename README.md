@@ -74,35 +74,33 @@ OTEL_ENDPOINT=http://jaeger:4317
 
 ## Architecture
 
+```
 User Browser
-│
-│  HTTP + JWT Bearer Token
-▼
-┌────────────────────────────────────────────────────────────────┐
-│  Docker Compose Environment                                    │
-│                                                                │
-│  ┌─────────────────┐      ┌─────────────────┐                 │
-│  │   FastAPI App   │─────▶│    Keycloak     │                 │
-│  │   Port: 8000    │◀─────│   Port: 8080    │                 │
-│  │                 │      └─────────────────┘                 │
-│  │  auth.py        │                                          │
-│  │  routes.py      │─────▶ Azure OpenAI (GPT-4.1-mini)        │
-│  │  agent.py       │       Function Calling / Tool Selection   │
-│  │  skills.py      │                                          │
-│  │  observability  │─────▶ Jaeger (:16686)                    │
-│  └────────┬────────┘       OpenTelemetry Traces               │
-│           │                                                    │
-│     ┌─────┼──────────────────────┐                            │
-│     ▼     ▼                      ▼                            │
-│  ┌──────┐ ┌───────────┐ ┌──────────────┐                      │
-│  │Redis │ │PostgreSQL │ │  MCP Server  │                      │
-│  │:6379 │ │  :5432    │ │   :8001      │                      │
-│  │      │ │           │ │              │                      │
-│  │Cache │ │customers  │ │ Tools as     │                      │
-│  │Session│ │issues     │ │ Protocol     │                      │
-│  │Logs  │ │next_actions│ │              │                      │
-│  └──────┘ └───────────┘ └──────────────┘                      │
-└────────────────────────────────────────────────────────────────┘
+     │
+     │  HTTP + JWT Bearer Token
+     ▼
+┌────────────────────────────────────────────────────┐
+│  Docker Compose Environment                        │
+│                                                    │
+│  ┌─────────────────┐      ┌─────────────────┐      │
+│  │   FastAPI App   │─────▶│    Keycloak     │      │
+│  │   Port: 8000    │◀─────│   Port: 8080    │      │
+│  │                 │      └─────────────────┘      │
+│  │  auth.py        │                               │
+│  │  routes.py      │─────▶ Azure OpenAI            │
+│  │  agent.py       │       Function Calling         │
+│  │  skills.py      │                               │
+│  │  observability  │─────▶ Jaeger (:16686)          │
+│  └────────┬────────┘       OpenTelemetry Traces     │
+│           │                                        │
+│     ┌─────┼──────────────┐                         │
+│     ▼     ▼              ▼                         │
+│  ┌──────┐ ┌───────────┐ ┌──────────┐               │
+│  │Redis │ │PostgreSQL │ │MCP Server│               │
+│  │:6379 │ │  :5432    │ │  :8001   │               │
+│  └──────┘ └───────────┘ └──────────┘               │
+└────────────────────────────────────────────────────┘
+```
 
 See `docs/architecture.png` for the full system diagram.
 
@@ -110,6 +108,7 @@ See `docs/architecture.png` for the full system diagram.
 
 ## Project Structure
 
+```
 acme-assistant/
 ├── docker-compose.yml        # All six services
 ├── .env                      # Secrets — not committed
@@ -132,9 +131,7 @@ acme-assistant/
 │       └── index.html        # Chat UI
 │
 ├── mcp/
-│   ├── mcp_server.py      # MCP server — all tool logic lives here
-│   │                      # HTTP interface + stdio MCP protocol
-│   │                      # Agent calls tools via HTTP
+│   ├── mcp_server.py         # MCP server — all tool logic
 │   ├── Dockerfile
 │   └── requirements.txt
 │
@@ -149,6 +146,7 @@ acme-assistant/
 │
 └── keycloak/
     └── realm.json            # Realm + roles + users
+```
 
 ---
 
