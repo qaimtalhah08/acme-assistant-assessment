@@ -422,5 +422,4 @@ User:  salesuser | Query: Show me issues for XYZ Unknown Company...
   Total time:  22.4s
 
   Results saved to: eval_results.json
-======================================================= 
- 
+=======================================================

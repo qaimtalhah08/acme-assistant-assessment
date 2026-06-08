@@ -284,5 +284,3 @@ Be concise and professional. Focus on current status and what has been done.
         # Return error string rather than raising to prevent
         # the calling agent tool from crashing on skill failure
         return f"Could not summarize issue: {str(e)}"
- 
- 
